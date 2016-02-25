@@ -23,6 +23,7 @@ import (
 	"github.com/astaxie/beego/context"
 	"github.com/bmizerany/pat"
 	// "github.com/daryl/zeus"
+	dhr "github.com/DATA-DOG/httprouter"
 	"github.com/dimfeld/httptreemux"
 	"github.com/emicklei/go-restful"
 	"github.com/gin-gonic/gin"
@@ -690,6 +691,36 @@ func loadHttpRouter(routes []route) http.Handler {
 
 func loadHttpRouterSingle(method, path string, handle httprouter.Handle) http.Handler {
 	router := httprouter.New()
+	router.Handle(method, path, handle)
+	return router
+}
+
+// HttpRouter modified
+func DhrHandle(_ http.ResponseWriter, _ *http.Request, _ dhr.Params) {}
+
+func DhrHandleWrite(w http.ResponseWriter, _ *http.Request, ps dhr.Params) {
+	io.WriteString(w, ps.ByName("name"))
+}
+
+func DhrHandleTest(w http.ResponseWriter, r *http.Request, _ dhr.Params) {
+	io.WriteString(w, r.RequestURI)
+}
+
+func loadDhr(routes []route) http.Handler {
+	h := DhrHandle
+	if loadTestHandler {
+		h = DhrHandleTest
+	}
+
+	router := dhr.New()
+	for _, route := range routes {
+		router.Handle(route.method, route.path, h)
+	}
+	return router
+}
+
+func loadDhrSingle(method, path string, handle dhr.Handle) http.Handler {
+	router := dhr.New()
 	router.Handle(method, path, handle)
 	return router
 }

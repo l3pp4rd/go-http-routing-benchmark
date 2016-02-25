@@ -69,6 +69,7 @@ var (
 	parseGoRestful   http.Handler
 	parseGorillaMux  http.Handler
 	parseHttpRouter  http.Handler
+	parseDhr         http.Handler
 	parseVanilla     http.Handler
 	parseHttpTreeMux http.Handler
 	parseKocha       http.Handler
@@ -127,6 +128,9 @@ func init() {
 	})
 	calcMem("HttpRouter", func() {
 		parseHttpRouter = loadHttpRouter(parseAPI)
+	})
+	calcMem("Dhr", func() {
+		parseDhr = loadDhr(parseAPI)
 	})
 	calcMem("Vanilla", func() {
 		parseVanilla = loadVanilla(parseAPI)
@@ -230,6 +234,10 @@ func BenchmarkGorillaMux_ParseStatic(b *testing.B) {
 func BenchmarkHttpRouter_ParseStatic(b *testing.B) {
 	req, _ := http.NewRequest("GET", "/1/users", nil)
 	benchRequest(b, parseHttpRouter, req)
+}
+func BenchmarkDhr_ParseStatic(b *testing.B) {
+	req, _ := http.NewRequest("GET", "/1/users", nil)
+	benchRequest(b, parseDhr, req)
 }
 func BenchmarkVanilla_ParseStatic(b *testing.B) {
 	req, _ := http.NewRequest("GET", "/1/users", nil)
@@ -348,6 +356,10 @@ func BenchmarkHttpRouter_ParseParam(b *testing.B) {
 	req, _ := http.NewRequest("GET", "/1/classes/go", nil)
 	benchRequest(b, parseHttpRouter, req)
 }
+func BenchmarkDhr_ParseParam(b *testing.B) {
+	req, _ := http.NewRequest("GET", "/1/classes/go", nil)
+	benchRequest(b, parseDhr, req)
+}
 func BenchmarkVanilla_ParseParam(b *testing.B) {
 	req, _ := http.NewRequest("GET", "/1/classes/go", nil)
 	benchRequest(b, parseVanilla, req)
@@ -465,6 +477,10 @@ func BenchmarkHttpRouter_Parse2Params(b *testing.B) {
 	req, _ := http.NewRequest("GET", "/1/classes/go/123456789", nil)
 	benchRequest(b, parseHttpRouter, req)
 }
+func BenchmarkDhr_Parse2Params(b *testing.B) {
+	req, _ := http.NewRequest("GET", "/1/classes/go/123456789", nil)
+	benchRequest(b, parseDhr, req)
+}
 func BenchmarkVanilla_Parse2Params(b *testing.B) {
 	req, _ := http.NewRequest("GET", "/1/classes/go/123456789", nil)
 	benchRequest(b, parseVanilla, req)
@@ -568,6 +584,9 @@ func BenchmarkGorillaMux_ParseAll(b *testing.B) {
 }
 func BenchmarkHttpRouter_ParseAll(b *testing.B) {
 	benchRoutes(b, parseHttpRouter, parseAPI)
+}
+func BenchmarkDhr_ParseAll(b *testing.B) {
+	benchRoutes(b, parseDhr, parseAPI)
 }
 func BenchmarkVanilla_ParseAll(b *testing.B) {
 	benchRoutes(b, parseVanilla, parseAPI)

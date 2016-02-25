@@ -175,6 +175,12 @@ func BenchmarkHttpRouter_Param(b *testing.B) {
 	r, _ := http.NewRequest("GET", "/user/gordon", nil)
 	benchRequest(b, router, r)
 }
+func BenchmarkDhr_Param(b *testing.B) {
+	router := loadDhrSingle("GET", "/user/:name", DhrHandle)
+
+	r, _ := http.NewRequest("GET", "/user/gordon", nil)
+	benchRequest(b, router, r)
+}
 func BenchmarkVanilla_Param(b *testing.B) {
 	router := loadVanillaSingle("GET", "/user/:name", http.HandlerFunc(vanillaHandle))
 
@@ -354,6 +360,12 @@ func BenchmarkGorillaMux_Param5(b *testing.B) {
 }
 func BenchmarkHttpRouter_Param5(b *testing.B) {
 	router := loadHttpRouterSingle("GET", fiveColon, httpRouterHandle)
+
+	r, _ := http.NewRequest("GET", fiveRoute, nil)
+	benchRequest(b, router, r)
+}
+func BenchmarkDhr_Param5(b *testing.B) {
+	router := loadDhrSingle("GET", fiveColon, DhrHandle)
 
 	r, _ := http.NewRequest("GET", fiveRoute, nil)
 	benchRequest(b, router, r)
@@ -540,6 +552,12 @@ func BenchmarkHttpRouter_Param20(b *testing.B) {
 	r, _ := http.NewRequest("GET", twentyRoute, nil)
 	benchRequest(b, router, r)
 }
+func BenchmarkDhr_Param20(b *testing.B) {
+	router := loadDhrSingle("GET", twentyColon, DhrHandle)
+
+	r, _ := http.NewRequest("GET", twentyRoute, nil)
+	benchRequest(b, router, r)
+}
 func BenchmarkVanilla_Param20(b *testing.B) {
 	router := loadVanillaSingle("GET", twentyColon, http.HandlerFunc(vanillaHandle))
 
@@ -714,6 +732,12 @@ func BenchmarkGorillaMux_ParamWrite(b *testing.B) {
 }
 func BenchmarkHttpRouter_ParamWrite(b *testing.B) {
 	router := loadHttpRouterSingle("GET", "/user/:name", httpRouterHandleWrite)
+
+	r, _ := http.NewRequest("GET", "/user/gordon", nil)
+	benchRequest(b, router, r)
+}
+func BenchmarkDhr_ParamWrite(b *testing.B) {
+	router := loadDhrSingle("GET", "/user/:name", DhrHandleWrite)
 
 	r, _ := http.NewRequest("GET", "/user/gordon", nil)
 	benchRequest(b, router, r)

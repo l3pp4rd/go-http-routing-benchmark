@@ -25,6 +25,7 @@ var (
 		{"GoRestful", loadGoRestful},
 		{"GorillaMux", loadGorillaMux},
 		{"HttpRouter", loadHttpRouter},
+		{"Dhr", loadDhr},
 		{"Vanilla", loadVanilla},
 		{"HttpTreeMux", loadHttpTreeMux},
 		//{"Kocha", loadKocha},

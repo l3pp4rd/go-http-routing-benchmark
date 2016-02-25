@@ -31,6 +31,7 @@ import (
 	"github.com/gocraft/web"
 	"github.com/gorilla/mux"
 	"github.com/julienschmidt/httprouter"
+	vanilla "github.com/l3pp4rd/router"
 	"github.com/labstack/echo"
 	llog "github.com/lunny/log"
 	"github.com/lunny/tango"
@@ -46,8 +47,6 @@ import (
 	"github.com/rcrowley/go-tigertonic"
 	"github.com/revel/revel"
 	"github.com/robfig/pathtree"
-	"github.com/typepress/rivet"
-	"github.com/ursiform/bear"
 	"github.com/vanng822/r2router"
 	goji "github.com/zenazn/goji/web"
 )
@@ -133,45 +132,45 @@ func loadAceSingle(method, path string, handle ace.HandlerFunc) http.Handler {
 }
 
 // bear
-func bearHandler(_ http.ResponseWriter, _ *http.Request, _ *bear.Context) {}
+// func bearHandler(_ http.ResponseWriter, _ *http.Request, _ *bear.Context) {}
 
-func bearHandlerWrite(w http.ResponseWriter, _ *http.Request, ctx *bear.Context) {
-	io.WriteString(w, ctx.Params["name"])
-}
+// func bearHandlerWrite(w http.ResponseWriter, _ *http.Request, ctx *bear.Context) {
+// 	io.WriteString(w, ctx.Params["name"])
+// }
 
-func bearHandlerTest(w http.ResponseWriter, r *http.Request, _ *bear.Context) {
-	io.WriteString(w, r.RequestURI)
-}
+// func bearHandlerTest(w http.ResponseWriter, r *http.Request, _ *bear.Context) {
+// 	io.WriteString(w, r.RequestURI)
+// }
 
-func loadBear(routes []route) http.Handler {
-	h := bearHandler
-	if loadTestHandler {
-		h = bearHandlerTest
-	}
+// func loadBear(routes []route) http.Handler {
+// 	h := bearHandler
+// 	if loadTestHandler {
+// 		h = bearHandlerTest
+// 	}
 
-	router := bear.New()
-	re := regexp.MustCompile(":([^/]*)")
-	for _, route := range routes {
-		switch route.method {
-		case "GET", "POST", "PUT", "PATCH", "DELETE":
-			router.On(route.method, re.ReplaceAllString(route.path, "{$1}"), h)
-		default:
-			panic("Unknown HTTP method: " + route.method)
-		}
-	}
-	return router
-}
+// 	router := bear.New()
+// 	re := regexp.MustCompile(":([^/]*)")
+// 	for _, route := range routes {
+// 		switch route.method {
+// 		case "GET", "POST", "PUT", "PATCH", "DELETE":
+// 			router.On(route.method, re.ReplaceAllString(route.path, "{$1}"), h)
+// 		default:
+// 			panic("Unknown HTTP method: " + route.method)
+// 		}
+// 	}
+// 	return router
+// }
 
-func loadBearSingle(method string, path string, handler bear.HandlerFunc) http.Handler {
-	router := bear.New()
-	switch method {
-	case "GET", "POST", "PUT", "PATCH", "DELETE":
-		router.On(method, path, handler)
-	default:
-		panic("Unknown HTTP method: " + method)
-	}
-	return router
-}
+// func loadBearSingle(method string, path string, handler bear.HandlerFunc) http.Handler {
+// 	router := bear.New()
+// 	switch method {
+// 	case "GET", "POST", "PUT", "PATCH", "DELETE":
+// 		router.On(method, path, handler)
+// 	default:
+// 		panic("Unknown HTTP method: " + method)
+// 	}
+// 	return router
+// }
 
 // beego
 func beegoHandler(ctx *context.Context) {}
@@ -695,6 +694,36 @@ func loadHttpRouterSingle(method, path string, handle httprouter.Handle) http.Ha
 	return router
 }
 
+// Vanilla
+func vanillaHandle(_ http.ResponseWriter, _ *http.Request) {}
+
+func vanillaHandleWrite(w http.ResponseWriter, req *http.Request) {
+	io.WriteString(w, vanilla.Parameters(req)["name"])
+}
+
+func vanillaHandleTest(w http.ResponseWriter, r *http.Request) {
+	io.WriteString(w, r.RequestURI)
+}
+
+func loadVanilla(routes []route) http.Handler {
+	h := vanillaHandle
+	if loadTestHandler {
+		h = vanillaHandleTest
+	}
+
+	router := vanilla.New()
+	for _, route := range routes {
+		router.Handle(route.method, route.path, http.HandlerFunc(h))
+	}
+	return router.Server()
+}
+
+func loadVanillaSingle(method, path string, handler http.Handler) http.Handler {
+	router := vanilla.New()
+	router.Handle(method, path, handler)
+	return router.Server()
+}
+
 // httpTreeMux
 func httpTreeMuxHandler(_ http.ResponseWriter, _ *http.Request, _ map[string]string) {}
 
@@ -1130,36 +1159,36 @@ func loadRevelSingle(method, path, action string) http.Handler {
 }
 
 // Rivet
-func rivetHandler() {}
+// func rivetHandler() {}
 
-func rivetHandlerWrite(c rivet.Context) {
-	c.WriteString(c.Get("name"))
-}
+// func rivetHandlerWrite(c rivet.Context) {
+// 	c.WriteString(c.Get("name"))
+// }
 
-func rivetHandlerTest(c rivet.Context) {
-	c.WriteString(c.Req.RequestURI)
-}
+// func rivetHandlerTest(c rivet.Context) {
+// 	c.WriteString(c.Req.RequestURI)
+// }
 
-func loadRivet(routes []route) http.Handler {
-	var h interface{} = rivetHandler
-	if loadTestHandler {
-		h = rivetHandlerTest
-	}
+// func loadRivet(routes []route) http.Handler {
+// 	var h interface{} = rivetHandler
+// 	if loadTestHandler {
+// 		h = rivetHandlerTest
+// 	}
 
-	router := rivet.New()
-	for _, route := range routes {
-		router.Handle(route.method, route.path, h)
-	}
-	return router
-}
+// 	router := rivet.New()
+// 	for _, route := range routes {
+// 		router.Handle(route.method, route.path, h)
+// 	}
+// 	return router
+// }
 
-func loadRivetSingle(method, path string, handler interface{}) http.Handler {
-	router := rivet.New()
+// func loadRivetSingle(method, path string, handler interface{}) http.Handler {
+// 	router := rivet.New()
 
-	router.Handle(method, path, handler)
+// 	router.Handle(method, path, handler)
 
-	return router
-}
+// 	return router
+// }
 
 // Tango
 func tangoHandler(ctx *tango.Context) {}

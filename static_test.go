@@ -172,8 +172,8 @@ var staticRoutes = []route{
 var (
 	staticHttpServeMux http.Handler
 
-	staticAce         http.Handler
-	staticBear        http.Handler
+	staticAce http.Handler
+	// staticBear        http.Handler
 	staticBeego       http.Handler
 	staticBone        http.Handler
 	staticDenco       http.Handler
@@ -185,6 +185,7 @@ var (
 	staticGoRestful   http.Handler
 	staticGorillaMux  http.Handler
 	staticHttpRouter  http.Handler
+	staticVanilla     http.Handler
 	staticHttpTreeMux http.Handler
 	staticKocha       http.Handler
 	staticMacaron     http.Handler
@@ -193,11 +194,11 @@ var (
 	staticPossum      http.Handler
 	staticR2router    http.Handler
 	staticRevel       http.Handler
-	staticRivet       http.Handler
-	staticTango       http.Handler
-	staticTigerTonic  http.Handler
-	staticTraffic     http.Handler
-	staticVulcan      http.Handler
+	// staticRivet       http.Handler
+	staticTango      http.Handler
+	staticTigerTonic http.Handler
+	staticTraffic    http.Handler
+	staticVulcan     http.Handler
 	// staticZeus        http.Handler
 )
 
@@ -215,9 +216,9 @@ func init() {
 	calcMem("Ace", func() {
 		staticAce = loadAce(staticRoutes)
 	})
-	calcMem("Bear", func() {
-		staticBear = loadBear(staticRoutes)
-	})
+	// calcMem("Bear", func() {
+	// 	staticBear = loadBear(staticRoutes)
+	// })
 	calcMem("Beego", func() {
 		staticBeego = loadBeego(staticRoutes)
 	})
@@ -251,6 +252,9 @@ func init() {
 	calcMem("HttpRouter", func() {
 		staticHttpRouter = loadHttpRouter(staticRoutes)
 	})
+	calcMem("Vanilla", func() {
+		staticVanilla = loadVanilla(staticRoutes)
+	})
 	calcMem("HttpTreeMux", func() {
 		staticHttpTreeMux = loadHttpTreeMux(staticRoutes)
 	})
@@ -275,9 +279,9 @@ func init() {
 	calcMem("Revel", func() {
 		staticRevel = loadRevel(staticRoutes)
 	})
-	calcMem("Rivet", func() {
-		staticRivet = loadRivet(staticRoutes)
-	})
+	// calcMem("Rivet", func() {
+	// 	staticRivet = loadRivet(staticRoutes)
+	// })
 	calcMem("Tango", func() {
 		staticTango = loadTango(staticRoutes)
 	})
@@ -308,9 +312,10 @@ func BenchmarkHttpServeMux_StaticAll(b *testing.B) {
 func BenchmarkBeego_StaticAll(b *testing.B) {
 	benchRoutes(b, staticBeego, staticRoutes)
 }
-func BenchmarkBear_StaticAll(b *testing.B) {
-	benchRoutes(b, staticBear, staticRoutes)
-}
+
+// func BenchmarkBear_StaticAll(b *testing.B) {
+// 	benchRoutes(b, staticBear, staticRoutes)
+// }
 func BenchmarkBone_StaticAll(b *testing.B) {
 	benchRoutes(b, staticBone, staticRoutes)
 }
@@ -341,6 +346,9 @@ func BenchmarkGorillaMux_StaticAll(b *testing.B) {
 func BenchmarkHttpRouter_StaticAll(b *testing.B) {
 	benchRoutes(b, staticHttpRouter, staticRoutes)
 }
+func BenchmarkVanilla_StaticAll(b *testing.B) {
+	benchRoutes(b, staticVanilla, staticRoutes)
+}
 func BenchmarkHttpTreeMux_StaticAll(b *testing.B) {
 	benchRoutes(b, staticHttpRouter, staticRoutes)
 }
@@ -365,9 +373,10 @@ func BenchmarkR2router_StaticAll(b *testing.B) {
 func BenchmarkRevel_StaticAll(b *testing.B) {
 	benchRoutes(b, staticRevel, staticRoutes)
 }
-func BenchmarkRivet_StaticAll(b *testing.B) {
-	benchRoutes(b, staticRivet, staticRoutes)
-}
+
+// func BenchmarkRivet_StaticAll(b *testing.B) {
+// 	benchRoutes(b, staticRivet, staticRoutes)
+// }
 func BenchmarkTango_StaticAll(b *testing.B) {
 	benchRoutes(b, staticTango, staticRoutes)
 }

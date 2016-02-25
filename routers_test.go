@@ -13,7 +13,7 @@ var (
 		load func(routes []route) http.Handler
 	}{
 		{"Ace", loadAce},
-		{"Bear", loadBear},
+		// {"Bear", loadBear},
 		{"Beego", loadBeego},
 		{"Bone", loadBone},
 		{"Denco", loadDenco},
@@ -25,6 +25,7 @@ var (
 		{"GoRestful", loadGoRestful},
 		{"GorillaMux", loadGorillaMux},
 		{"HttpRouter", loadHttpRouter},
+		{"Vanilla", loadVanilla},
 		{"HttpTreeMux", loadHttpTreeMux},
 		//{"Kocha", loadKocha},
 		{"Macaron", loadMacaron},
@@ -33,7 +34,7 @@ var (
 		{"Possum", loadPossum},
 		{"R2router", loadR2router},
 		{"Revel", loadRevel},
-		{"Rivet", loadRivet},
+		// {"Rivet", loadRivet},
 		{"Tango", loadTango},
 		{"TigerTonic", loadTigerTonic},
 		{"Traffic", loadTraffic},

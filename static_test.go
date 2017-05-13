@@ -186,6 +186,7 @@ var (
 	staticGoRestful   http.Handler
 	staticGorillaMux  http.Handler
 	staticHttpRouter  http.Handler
+	staticFastRoute   http.Handler
 	staticHttpTreeMux http.Handler
 	staticKocha       http.Handler
 	staticLARS        http.Handler
@@ -229,9 +230,9 @@ func init() {
 	calcMem("Denco", func() {
 		staticDenco = loadDenco(staticRoutes)
 	})
-	calcMem("Echo", func() {
-		staticEcho = loadEcho(staticRoutes)
-	})
+	// calcMem("Echo", func() {
+	// 	staticEcho = loadEcho(staticRoutes)
+	// })
 	calcMem("Gin", func() {
 		staticGin = loadGin(staticRoutes)
 	})
@@ -241,20 +242,23 @@ func init() {
 	calcMem("Goji", func() {
 		staticGoji = loadGoji(staticRoutes)
 	})
-	calcMem("Gojiv2", func() {
-		staticGojiv2 = loadGojiv2(staticRoutes)
-	})
-	calcMem("GoJsonRest", func() {
-		staticGoJsonRest = loadGoJsonRest(staticRoutes)
-	})
-	calcMem("GoRestful", func() {
-		staticGoRestful = loadGoRestful(staticRoutes)
-	})
+	// calcMem("Gojiv2", func() {
+	// 	staticGojiv2 = loadGojiv2(staticRoutes)
+	// })
+	// calcMem("GoJsonRest", func() {
+	// 	staticGoJsonRest = loadGoJsonRest(staticRoutes)
+	// })
+	// calcMem("GoRestful", func() {
+	// 	staticGoRestful = loadGoRestful(staticRoutes)
+	// })
 	calcMem("GorillaMux", func() {
 		staticGorillaMux = loadGorillaMux(staticRoutes)
 	})
 	calcMem("HttpRouter", func() {
 		staticHttpRouter = loadHttpRouter(staticRoutes)
+	})
+	calcMem("FastRoute", func() {
+		staticFastRoute = loadFastRoute(staticRoutes)
 	})
 	calcMem("HttpTreeMux", func() {
 		staticHttpTreeMux = loadHttpTreeMux(staticRoutes)
@@ -289,9 +293,9 @@ func init() {
 	calcMem("Tango", func() {
 		staticTango = loadTango(staticRoutes)
 	})
-	calcMem("TigerTonic", func() {
-		staticTigerTonic = loadTigerTonic(staticRoutes)
-	})
+	// calcMem("TigerTonic", func() {
+	// 	staticTigerTonic = loadTigerTonic(staticRoutes)
+	// })
 	calcMem("Traffic", func() {
 		staticTraffic = loadTraffic(staticRoutes)
 	})
@@ -349,11 +353,14 @@ func BenchmarkGoRestful_StaticAll(b *testing.B) {
 func BenchmarkGorillaMux_StaticAll(b *testing.B) {
 	benchRoutes(b, staticGorillaMux, staticRoutes)
 }
+func BenchmarkFastRoute_StaticAll(b *testing.B) {
+	benchRoutes(b, staticFastRoute, staticRoutes)
+}
 func BenchmarkHttpRouter_StaticAll(b *testing.B) {
 	benchRoutes(b, staticHttpRouter, staticRoutes)
 }
 func BenchmarkHttpTreeMux_StaticAll(b *testing.B) {
-	benchRoutes(b, staticHttpRouter, staticRoutes)
+	benchRoutes(b, staticHttpTreeMux, staticRoutes)
 }
 func BenchmarkKocha_StaticAll(b *testing.B) {
 	benchRoutes(b, staticKocha, staticRoutes)

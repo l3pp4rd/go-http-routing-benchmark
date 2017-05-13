@@ -288,6 +288,7 @@ var (
 	githubGoRestful   http.Handler
 	githubGorillaMux  http.Handler
 	githubHttpRouter  http.Handler
+	githubFastRoute   http.Handler
 	githubHttpTreeMux http.Handler
 	githubKocha       http.Handler
 	githubLARS        http.Handler
@@ -323,9 +324,9 @@ func init() {
 	calcMem("Denco", func() {
 		githubDenco = loadDenco(githubAPI)
 	})
-	calcMem("Echo", func() {
-		githubEcho = loadEcho(githubAPI)
-	})
+	// calcMem("Echo", func() {
+	// 	githubEcho = loadEcho(githubAPI)
+	// })
 	calcMem("Gin", func() {
 		githubGin = loadGin(githubAPI)
 	})
@@ -335,20 +336,23 @@ func init() {
 	calcMem("Goji", func() {
 		githubGoji = loadGoji(githubAPI)
 	})
-	calcMem("Gojiv2", func() {
-		githubGojiv2 = loadGojiv2(githubAPI)
-	})
-	calcMem("GoJsonRest", func() {
-		githubGoJsonRest = loadGoJsonRest(githubAPI)
-	})
-	calcMem("GoRestful", func() {
-		githubGoRestful = loadGoRestful(githubAPI)
-	})
+	// calcMem("Gojiv2", func() {
+	// 	githubGojiv2 = loadGojiv2(githubAPI)
+	// })
+	// calcMem("GoJsonRest", func() {
+	// 	githubGoJsonRest = loadGoJsonRest(githubAPI)
+	// })
+	// calcMem("GoRestful", func() {
+	// 	githubGoRestful = loadGoRestful(githubAPI)
+	// })
 	calcMem("GorillaMux", func() {
 		githubGorillaMux = loadGorillaMux(githubAPI)
 	})
 	calcMem("HttpRouter", func() {
 		githubHttpRouter = loadHttpRouter(githubAPI)
+	})
+	calcMem("FastRoute", func() {
+		githubFastRoute = loadFastRoute(githubAPI)
 	})
 	calcMem("HttpTreeMux", func() {
 		githubHttpTreeMux = loadHttpTreeMux(githubAPI)
@@ -383,9 +387,9 @@ func init() {
 	calcMem("Tango", func() {
 		githubTango = loadTango(githubAPI)
 	})
-	calcMem("TigerTonic", func() {
-		githubTigerTonic = loadTigerTonic(githubAPI)
-	})
+	// calcMem("TigerTonic", func() {
+	// 	githubTigerTonic = loadTigerTonic(githubAPI)
+	// })
 	calcMem("Traffic", func() {
 		githubTraffic = loadTraffic(githubAPI)
 	})
@@ -455,6 +459,10 @@ func BenchmarkGorillaMux_GithubStatic(b *testing.B) {
 func BenchmarkHttpRouter_GithubStatic(b *testing.B) {
 	req, _ := http.NewRequest("GET", "/user/repos", nil)
 	benchRequest(b, githubHttpRouter, req)
+}
+func BenchmarkFastRoute_GithubStatic(b *testing.B) {
+	req, _ := http.NewRequest("GET", "/user/repos", nil)
+	benchRequest(b, githubFastRoute, req)
 }
 func BenchmarkHttpTreeMux_GithubStatic(b *testing.B) {
 	req, _ := http.NewRequest("GET", "/user/repos", nil)
@@ -575,6 +583,10 @@ func BenchmarkHttpRouter_GithubParam(b *testing.B) {
 	req, _ := http.NewRequest("GET", "/repos/julienschmidt/httprouter/stargazers", nil)
 	benchRequest(b, githubHttpRouter, req)
 }
+func BenchmarkFastRoute_GithubParam(b *testing.B) {
+	req, _ := http.NewRequest("GET", "/repos/julienschmidt/httprouter/stargazers", nil)
+	benchRequest(b, githubFastRoute, req)
+}
 func BenchmarkHttpTreeMux_GithubParam(b *testing.B) {
 	req, _ := http.NewRequest("GET", "/repos/julienschmidt/httprouter/stargazers", nil)
 	benchRequest(b, githubHttpTreeMux, req)
@@ -679,6 +691,9 @@ func BenchmarkGorillaMux_GithubAll(b *testing.B) {
 }
 func BenchmarkHttpRouter_GithubAll(b *testing.B) {
 	benchRoutes(b, githubHttpRouter, githubAPI)
+}
+func BenchmarkFastRoute_GithubAll(b *testing.B) {
+	benchRoutes(b, githubFastRoute, githubAPI)
 }
 func BenchmarkHttpTreeMux_GithubAll(b *testing.B) {
 	benchRoutes(b, githubHttpTreeMux, githubAPI)

@@ -50,6 +50,7 @@ var (
 	gplusGoRestful   http.Handler
 	gplusGorillaMux  http.Handler
 	gplusHttpRouter  http.Handler
+	gplusFastRoute   http.Handler
 	gplusHttpTreeMux http.Handler
 	gplusKocha       http.Handler
 	gplusLARS        http.Handler
@@ -85,9 +86,9 @@ func init() {
 	calcMem("Denco", func() {
 		gplusDenco = loadDenco(gplusAPI)
 	})
-	calcMem("Echo", func() {
-		gplusEcho = loadEcho(gplusAPI)
-	})
+	// calcMem("Echo", func() {
+	// 	gplusEcho = loadEcho(gplusAPI)
+	// })
 	calcMem("Gin", func() {
 		gplusGin = loadGin(gplusAPI)
 	})
@@ -97,20 +98,23 @@ func init() {
 	calcMem("Goji", func() {
 		gplusGoji = loadGoji(gplusAPI)
 	})
-	calcMem("Gojiv2", func() {
-		gplusGojiv2 = loadGojiv2(gplusAPI)
-	})
-	calcMem("GoJsonRest", func() {
-		gplusGoJsonRest = loadGoJsonRest(gplusAPI)
-	})
-	calcMem("GoRestful", func() {
-		gplusGoRestful = loadGoRestful(gplusAPI)
-	})
+	// calcMem("Gojiv2", func() {
+	// 	gplusGojiv2 = loadGojiv2(gplusAPI)
+	// })
+	// calcMem("GoJsonRest", func() {
+	// 	gplusGoJsonRest = loadGoJsonRest(gplusAPI)
+	// })
+	// calcMem("GoRestful", func() {
+	// 	gplusGoRestful = loadGoRestful(gplusAPI)
+	// })
 	calcMem("GorillaMux", func() {
 		gplusGorillaMux = loadGorillaMux(gplusAPI)
 	})
 	calcMem("HttpRouter", func() {
 		gplusHttpRouter = loadHttpRouter(gplusAPI)
+	})
+	calcMem("FastRoute", func() {
+		gplusFastRoute = loadFastRoute(gplusAPI)
 	})
 	calcMem("HttpTreeMux", func() {
 		gplusHttpTreeMux = loadHttpTreeMux(gplusAPI)
@@ -145,9 +149,9 @@ func init() {
 	calcMem("Tango", func() {
 		gplusTango = loadTango(gplusAPI)
 	})
-	calcMem("TigerTonic", func() {
-		gplusTigerTonic = loadTigerTonic(gplusAPI)
-	})
+	// calcMem("TigerTonic", func() {
+	// 	gplusTigerTonic = loadTigerTonic(gplusAPI)
+	// })
 	calcMem("Traffic", func() {
 		gplusTraffic = loadTraffic(gplusAPI)
 	})
@@ -217,6 +221,10 @@ func BenchmarkGorillaMux_GPlusStatic(b *testing.B) {
 func BenchmarkHttpRouter_GPlusStatic(b *testing.B) {
 	req, _ := http.NewRequest("GET", "/people", nil)
 	benchRequest(b, gplusHttpRouter, req)
+}
+func BenchmarkFastRoute_GPlusStatic(b *testing.B) {
+	req, _ := http.NewRequest("GET", "/people", nil)
+	benchRequest(b, gplusFastRoute, req)
 }
 func BenchmarkHttpTreeMux_GPlusStatic(b *testing.B) {
 	req, _ := http.NewRequest("GET", "/people", nil)
@@ -337,6 +345,10 @@ func BenchmarkHttpRouter_GPlusParam(b *testing.B) {
 	req, _ := http.NewRequest("GET", "/people/118051310819094153327", nil)
 	benchRequest(b, gplusHttpRouter, req)
 }
+func BenchmarkFastRoute_GPlusParam(b *testing.B) {
+	req, _ := http.NewRequest("GET", "/people/118051310819094153327", nil)
+	benchRequest(b, gplusFastRoute, req)
+}
 func BenchmarkHttpTreeMux_GPlusParam(b *testing.B) {
 	req, _ := http.NewRequest("GET", "/people/118051310819094153327", nil)
 	benchRequest(b, gplusHttpTreeMux, req)
@@ -456,6 +468,10 @@ func BenchmarkHttpRouter_GPlus2Params(b *testing.B) {
 	req, _ := http.NewRequest("GET", "/people/118051310819094153327/activities/123456789", nil)
 	benchRequest(b, gplusHttpRouter, req)
 }
+func BenchmarkFastRoute_GPlus2Params(b *testing.B) {
+	req, _ := http.NewRequest("GET", "/people/118051310819094153327/activities/123456789", nil)
+	benchRequest(b, gplusFastRoute, req)
+}
 func BenchmarkHttpTreeMux_GPlus2Params(b *testing.B) {
 	req, _ := http.NewRequest("GET", "/people/118051310819094153327/activities/123456789", nil)
 	benchRequest(b, gplusHttpTreeMux, req)
@@ -560,6 +576,9 @@ func BenchmarkGorillaMux_GPlusAll(b *testing.B) {
 }
 func BenchmarkHttpRouter_GPlusAll(b *testing.B) {
 	benchRoutes(b, gplusHttpRouter, gplusAPI)
+}
+func BenchmarkFastRoute_GPlusAll(b *testing.B) {
+	benchRoutes(b, gplusFastRoute, gplusAPI)
 }
 func BenchmarkHttpTreeMux_GPlusAll(b *testing.B) {
 	benchRoutes(b, gplusHttpTreeMux, gplusAPI)

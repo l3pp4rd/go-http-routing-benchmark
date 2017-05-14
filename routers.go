@@ -12,7 +12,6 @@ import (
 	"os"
 	"regexp"
 	"runtime"
-	"strings"
 
 	// If you add new routers please:
 	// - Keep the benchmark functions etc. alphabetically sorted
@@ -25,6 +24,7 @@ import (
 	"github.com/go-playground/lars"
 	// "github.com/daryl/zeus"
 	"github.com/DATA-DOG/fastroute"
+	fastroutemux "github.com/DATA-DOG/fastroute/mux"
 	"github.com/dimfeld/httptreemux"
 	"github.com/gin-gonic/gin"
 	"github.com/go-martini/martini"
@@ -733,51 +733,23 @@ var fastRouteHandleTest = http.HandlerFunc(func(w http.ResponseWriter, r *http.R
 	io.WriteString(w, r.RequestURI)
 })
 
-func fastRouteMethod(m string, h http.Handler) http.Handler {
-	m = strings.ToUpper(m)
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != m {
-			w.WriteHeader(405)
-		} else {
-			h.ServeHTTP(w, r)
-		}
-	})
-}
-
-func fastRouteByMethod(routes map[string][]fastroute.Router) fastroute.Router {
-	routers := make(map[string]fastroute.Router, len(routes))
-	for method, pack := range routes {
-		routers[method] = fastroute.New(pack...)
-	}
-
-	// could list allowed methods by matching other method route packs easily. but not the point
-	notAllowedHandler := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(405)
-	})
-
-	return fastroute.RouterFunc(func(r *http.Request) http.Handler {
-		if router, ok := routers[r.Method]; ok {
-			return router.Match(r)
-		}
-		return notAllowedHandler
-	})
-}
-
-func loadFastRoute(list []route) http.Handler {
+func loadFastRoute(routes []route) http.Handler {
 	h := fastRouteHandle
 	if loadTestHandler {
 		h = fastRouteHandleTest
 	}
 
-	byMethod := make(map[string][]fastroute.Router)
-	for _, route := range list {
-		byMethod[route.method] = append(byMethod[route.method], fastroute.Route(route.path, h))
+	mux := fastroutemux.New()
+	for _, route := range routes {
+		mux.Method(route.method, route.path, h)
 	}
-	return fastRouteByMethod(byMethod)
+	return mux.Server()
 }
 
 func loadFastRouteSingle(method, path string, handle http.Handler) http.Handler {
-	return fastroute.Route(path, fastRouteMethod(method, handle))
+	mux := fastroutemux.New()
+	mux.Method(method, path, handle)
+	return mux.Server()
 }
 
 // HttpRouter

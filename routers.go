@@ -12,6 +12,7 @@ import (
 	"os"
 	"regexp"
 	"runtime"
+	"strings"
 
 	// If you add new routers please:
 	// - Keep the benchmark functions etc. alphabetically sorted
@@ -739,9 +740,36 @@ func loadFastRoute(routes []route) http.Handler {
 		h = fastRouteHandleTest
 	}
 
-	mux := fastroutemux.New()
+	var static []map[string]http.Handler
+	midx := make(map[string]int)
+	named := make(map[string]fastroute.Router)
 	for _, route := range routes {
-		mux.Method(route.method, route.path, h)
+		if strings.IndexAny(route.path, ":*") != -1 {
+			if router, ok := named[route.method]; ok {
+				named[route.method] = fastroute.New(router, fastroute.Route(route.path, h))
+			} else {
+				named[route.method] = fastroute.Route(route.path, h)
+			}
+		} else {
+			idx, ok := midx[route.method]
+			if !ok {
+				idx = len(static)
+				static = append(static, make(map[string]http.Handler))
+				midx[route.method] = idx
+			}
+			static[idx][route.path] = h
+		}
+	}
+
+	mux := &fastroutemux.Mux{}
+	for m, i := range midx {
+		routes := static[i]
+		mux.Route(m, fastroute.RouterFunc(func(req *http.Request) http.Handler {
+			return routes[req.URL.Path]
+		}))
+	}
+	for m, r := range named {
+		mux.Route(m, r)
 	}
 	return mux.Server()
 }

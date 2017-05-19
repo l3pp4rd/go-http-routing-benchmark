@@ -25,7 +25,6 @@ import (
 	"github.com/go-playground/lars"
 	// "github.com/daryl/zeus"
 	"github.com/DATA-DOG/fastroute"
-	fastroutemux "github.com/DATA-DOG/fastroute/mux"
 	"github.com/dimfeld/httptreemux"
 	"github.com/gin-gonic/gin"
 	"github.com/go-martini/martini"
@@ -740,44 +739,51 @@ func loadFastRoute(routes []route) http.Handler {
 		h = fastRouteHandleTest
 	}
 
-	var static []map[string]http.Handler
-	midx := make(map[string]int)
-	named := make(map[string]fastroute.Router)
+	byMethod := make(map[string][]route)
 	for _, route := range routes {
-		if strings.IndexAny(route.path, ":*") != -1 {
-			if router, ok := named[route.method]; ok {
-				named[route.method] = fastroute.New(router, fastroute.Route(route.path, h))
-			} else {
-				named[route.method] = fastroute.Route(route.path, h)
-			}
-		} else {
-			idx, ok := midx[route.method]
-			if !ok {
-				idx = len(static)
-				static = append(static, make(map[string]http.Handler))
-				midx[route.method] = idx
-			}
-			static[idx][route.path] = h
-		}
+		byMethod[route.method] = append(byMethod[route.method], route)
 	}
 
-	mux := &fastroutemux.Mux{}
-	for m, i := range midx {
-		routes := static[i]
-		mux.Route(m, fastroute.RouterFunc(func(req *http.Request) http.Handler {
-			return routes[req.URL.Path]
+	chained := make(map[string]fastroute.Router)
+	for m, pack := range byMethod {
+		prefix := make(map[string]fastroute.Router)
+		static := make(map[string]http.Handler)
+		for _, r := range pack {
+			if idx := strings.IndexAny(r.path, ":*"); idx > 1 {
+				if _, ok := prefix[r.path[:idx]]; ok {
+					prefix[r.path[:idx]] = fastroute.Chain(prefix[r.path[:idx]], fastroute.New(r.path, h))
+				} else {
+					prefix[r.path[:idx]] = fastroute.New(r.path, h)
+				}
+			} else if idx == -1 {
+				static[r.path] = h
+			}
+		}
+		chained[m] = fastroute.Chain(fastroute.RouterFunc(func(req *http.Request) http.Handler {
+			return static[req.URL.Path]
+		}), fastroute.RouterFunc(func(req *http.Request) http.Handler {
+			p := req.URL.Path
+			for pfix, router := range prefix {
+				if len(p) > len(pfix) && p[:len(pfix)] == pfix {
+					return router
+				}
+			}
+			return nil
 		}))
 	}
-	for m, r := range named {
-		mux.Route(m, r)
-	}
-	return mux.Server()
+
+	return fastroute.RouterFunc(func(req *http.Request) http.Handler {
+		return chained[req.Method]
+	})
 }
 
 func loadFastRouteSingle(method, path string, handle http.Handler) http.Handler {
-	mux := fastroutemux.New()
-	mux.Method(method, path, handle)
-	return mux.Server()
+	router := map[string]fastroute.Router{
+		method: fastroute.New(path, handle),
+	}
+	return fastroute.RouterFunc(func(req *http.Request) http.Handler {
+		return router[req.Method]
+	})
 }
 
 // HttpRouter

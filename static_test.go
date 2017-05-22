@@ -258,7 +258,7 @@ func init() {
 		staticHttpRouter = loadHttpRouter(staticRoutes)
 	})
 	calcMem("FastRoute", func() {
-		staticFastRoute = loadFastRoute(staticRoutes)
+		staticFastRoute = loadFastRouteStatic(staticRoutes)
 	})
 	calcMem("HttpTreeMux", func() {
 		staticHttpTreeMux = loadHttpTreeMux(staticRoutes)

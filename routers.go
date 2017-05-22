@@ -723,6 +723,8 @@ func loadGorillaMuxSingle(method, path string, handler http.HandlerFunc) http.Ha
 }
 
 // FastRoute
+var notFoundHandler = http.NotFoundHandler()
+
 var fastRouteHandle = http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {})
 
 var fastRouteHandleWrite = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -733,56 +735,79 @@ var fastRouteHandleTest = http.HandlerFunc(func(w http.ResponseWriter, r *http.R
 	io.WriteString(w, r.RequestURI)
 })
 
+func loadFastRouteStatic(routes []route) http.Handler {
+	static := make(map[string]map[string]http.Handler)
+	for _, r := range routes {
+		if nil == static[r.method] {
+			static[r.method] = make(map[string]http.Handler)
+		}
+		static[r.method][r.path] = fastRouteHandle
+	}
+	return fastroute.RouterFunc(func(req *http.Request) http.Handler {
+		if m := static[req.Method]; m != nil {
+			return m[req.URL.Path]
+		}
+		return notFoundHandler
+	})
+}
+
 func loadFastRoute(routes []route) http.Handler {
 	h := fastRouteHandle
 	if loadTestHandler {
 		h = fastRouteHandleTest
 	}
 
-	byMethod := make(map[string][]route)
-	for _, route := range routes {
-		byMethod[route.method] = append(byMethod[route.method], route)
-	}
+	// not elegant, but for the sake of this benchmark, all of them are not practical
+	static := make(map[string]map[string]http.Handler)
+	// the best we can do, is to use static prefix for loads of named routes
+	prefix := make(map[string]map[string]fastroute.Router)
 
-	chained := make(map[string]fastroute.Router)
-	for m, pack := range byMethod {
-		prefix := make(map[string]fastroute.Router)
-		static := make(map[string]http.Handler)
-		for _, r := range pack {
-			if idx := strings.IndexAny(r.path, ":*"); idx > 1 {
-				if _, ok := prefix[r.path[:idx]]; ok {
-					prefix[r.path[:idx]] = fastroute.Chain(prefix[r.path[:idx]], fastroute.New(r.path, h))
-				} else {
-					prefix[r.path[:idx]] = fastroute.New(r.path, h)
-				}
-			} else if idx == -1 {
-				static[r.path] = h
+	for _, r := range routes {
+		if idx := strings.IndexAny(r.path, ":*"); idx == -1 {
+			if nil == static[r.method] {
+				static[r.method] = make(map[string]http.Handler)
+			}
+			static[r.method][r.path] = h
+		} else {
+			if nil == prefix[r.method] {
+				prefix[r.method] = make(map[string]fastroute.Router)
+			}
+			if nil == prefix[r.method][r.path[:idx]] {
+				prefix[r.method][r.path[:idx]] = fastroute.New(r.path, h)
+			} else {
+				prefix[r.method][r.path[:idx]] = fastroute.Chain(
+					prefix[r.method][r.path[:idx]],
+					fastroute.New(r.path, h),
+				)
 			}
 		}
-		chained[m] = fastroute.Chain(fastroute.RouterFunc(func(req *http.Request) http.Handler {
-			return static[req.URL.Path]
-		}), fastroute.RouterFunc(func(req *http.Request) http.Handler {
-			p := req.URL.Path
-			for pfix, router := range prefix {
-				if len(p) > len(pfix) && p[:len(pfix)] == pfix {
-					return router
-				}
-			}
-			return nil
-		}))
 	}
 
 	return fastroute.RouterFunc(func(req *http.Request) http.Handler {
-		return chained[req.Method]
+		p := req.URL.Path
+		if m := static[req.Method]; m != nil {
+			if h := m[p]; h != nil {
+				return h
+			}
+		}
+		if m := prefix[req.Method]; m != nil {
+			for pfix, router := range m {
+				if len(p) > len(pfix) && p[:len(pfix)] == pfix {
+					return router.Route(req)
+				}
+			}
+		}
+		return notFoundHandler
 	})
 }
 
 func loadFastRouteSingle(method, path string, handle http.Handler) http.Handler {
-	router := map[string]fastroute.Router{
-		method: fastroute.New(path, handle),
-	}
+	route := fastroute.New(path, handle)
 	return fastroute.RouterFunc(func(req *http.Request) http.Handler {
-		return router[req.Method]
+		if req.Method == method {
+			return route.Route(req)
+		}
+		return notFoundHandler
 	})
 }
 
